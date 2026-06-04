@@ -1,67 +1,92 @@
-import os
-import google.generativeai as genai
 import streamlit as st
-from datetime import date
+import google.generativeai as genai
 
+# Read API key from Streamlit Secrets
+api_key = st.secrets["AQ.Ab8RN6JPbuIGmk6Xs9Dr0qUeJAfQq9QIvO12x2G9R3Jv7Bafpg"]
 
+genai.configure(api_key=api_key)
 
-st.title("Pradeep's AI Travel Planner")
-st.subheader('Plan your next trip with AI')
+model = genai.GenerativeModel("gemini-2.5-flash")
 
+# Page Configuration
+st.set_page_config(
+    page_title="AI Travel Planner",
+    page_icon="🌍",
+    layout="wide"
+)
 
-# User input section in the sidebar
-st.sidebar.header('Enter details to generate a travel plan:')
-api_key = 'AQ.Ab8RN6JPbuIGmk6Xs9Dr0qUeJAfQq9QIvO12x2G9R3Jv7Bafpg'
-destination = st.sidebar.text_input('Destination', 'Bangalore')
-date_input = st.sidebar.date_input('Travel Start Date', min_value=date.today())
-date = date_input.strftime('%Y-%m-%d')
-budget = st.sidebar.number_input('Budget', min_value=100, value=5000, step=100)
-traviltype = st.sidebar.selectbox('Travel Type', ['train', 'road', 'air'])
-# duration = st.sidebar.slider('Duration (days)', 1, 3, 3)
-duration = st.sidebar.number_input('Duration (days)', min_value=1, value=3, step=1)
+# Header
+st.title("🌍 AI Travel Planner")
+st.markdown("### Plan your dream trip with AI")
 
-# Additional user preferences
-st.sidebar.subheader('Your Preferences:')
-# interests = st.sidebar.checklist('Interests', ['historical sites','nature','temples','food','shopeing'])
-interests = st.sidebar.text_input('Interests', "historical sites,nature,temples,food,shopping")
-specific_interests = st.sidebar.text_input('Specific Interests', 'art museums, hiking trails')
-accommodation_preference = st.sidebar.selectbox('Accommodation Preference', ['Hotel', 'Hostel', 'No Preference'])
-travel_style = st.sidebar.selectbox('Travel Style', ['Relaxed', 'Fast-Paced', 'Adventurous', 'Cultural', 'Family-Friendly'])
+# User Inputs
+destination = st.text_input("📍 Enter Destination")
 
-# Function to create a detailed message for the AI
-def get_personalized_travel_plan(user_preferences, trip_details, api_key):
-    genai.configure(api_key=api_key)
-    message = (
-        f"Create a detailed travel itinerary  focused on attractions, restaurants, and activities for a trip "
-        f" to {trip_details['destination']}, starting on {trip_details['date']}, lasting for "
-        f"{trip_details['duration']} days, within a budget of {trip_details['budget']}. This should include daily timings, "
-        f"preferences for {user_preferences['accommodation_preference']} accommodations, a {user_preferences['travel_style']} travel style, "
-        f"and interests in {user_preferences['interests']}.  dietary restrictions include "
-        
-        f"Must-visit landmarks include . Also, provide a travel checklist relevant to the destination and duration. rech the destination by {traviltype}"
-    )
-    model = genai.GenerativeModel('gemini-pro')
-    response = model.generate_content(message)
-    return response.text
+days = st.slider(
+    "🗓 Number of Days",
+    min_value=1,
+    max_value=15,
+    value=3
+)
 
-# Collecting user preferences and trip details for travel planning
-user_preferences = {
-    'interests': interests,
-    'specific_interests': specific_interests,
-    'accommodation_preference': accommodation_preference,
-    'travel_style': travel_style
-}
+budget = st.selectbox(
+    "💰 Select Budget",
+    ["Low", "Medium", "High"]
+)
 
-trip_details = {
-    'destination': destination,
-    'date': date,
-    'budget': budget,
-    'duration': duration
-}
+travel_type = st.selectbox(
+    "✈ Travel Type",
+    ["Solo", "Family", "Adventure", "Romantic", "Business"]
+)
 
-# Generate a personalized travel plan
-if st.sidebar.button('Generate Travel Plan'):
-    with st.spinner('Generating your personalized travel plan...'):
-        response = get_personalized_travel_plan(user_preferences, trip_details, api_key)
-        st.success(response)
-        st.balloons()
+interests = st.multiselect(
+    "🎯 Interests",
+    [
+        "Beaches",
+        "Mountains",
+        "Nature",
+        "Food",
+        "Shopping",
+        "Historical Places",
+        "Nightlife",
+        "Photography"
+    ]
+)
+
+# Generate Plan
+if st.button("🚀 Generate Travel Plan"):
+
+    if not destination:
+        st.warning("Please enter a destination.")
+    else:
+
+        prompt = f"""
+        Create a professional travel itinerary.
+
+        Destination: {destination}
+        Duration: {days} days
+        Budget: {budget}
+        Travel Type: {travel_type}
+        Interests: {', '.join(interests)}
+
+        Include:
+        1. Day-wise itinerary
+        2. Recommended attractions
+        3. Food recommendations
+        4. Estimated budget
+        5. Travel tips
+
+        Format with headings and bullet points.
+        """
+
+        with st.spinner("Generating AI Travel Plan..."):
+
+            response = model.generate_content(prompt)
+
+            st.success("Travel Plan Generated Successfully!")
+
+            st.markdown(response.text)
+
+# Footer
+st.markdown("---")
+st.caption("AI Travel Planner | Streamlit + Gemini AI")
