@@ -1,12 +1,15 @@
 import streamlit as st
 import google.generativeai as genai
 
-# Read API key from Streamlit Secrets
-api_key = "AQ.Ab8RN6JPbuIGmk6Xs9Dr0qUeJAfQq9QIvO12x2G9R3Jv7Bafpg"
+# =========================
+# PASTE YOUR API KEY HERE
+# =========================
+GEMINI_API_KEY = "AQ.Ab8RN6JPbuIGmk6Xs9Dr0qUeJAfQq9QIvO12x2G9R3Jv7Bafpg"
 
-genai.configure(api_key=api_key)
+genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel("gemini-2.5-flash")
+# Use a currently supported model
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Page Configuration
 st.set_page_config(
@@ -17,10 +20,10 @@ st.set_page_config(
 
 # Header
 st.title("🌍 AI Travel Planner")
-st.markdown("### Plan your dream trip with AI")
+st.markdown("Plan your perfect trip using AI")
 
 # User Inputs
-destination = st.text_input("📍 Enter Destination")
+destination = st.text_input("📍 Destination")
 
 days = st.slider(
     "🗓 Number of Days",
@@ -30,7 +33,7 @@ days = st.slider(
 )
 
 budget = st.selectbox(
-    "💰 Select Budget",
+    "💰 Budget",
     ["Low", "Medium", "High"]
 )
 
@@ -44,49 +47,49 @@ interests = st.multiselect(
     [
         "Beaches",
         "Mountains",
-        "Nature",
         "Food",
         "Shopping",
         "Historical Places",
+        "Nature",
         "Nightlife",
         "Photography"
     ]
 )
 
-# Generate Plan
 if st.button("🚀 Generate Travel Plan"):
 
     if not destination:
         st.warning("Please enter a destination.")
-    else:
+        st.stop()
 
-        prompt = f"""
-        Create a professional travel itinerary.
+    prompt = f"""
+    Create a detailed travel itinerary.
 
-        Destination: {destination}
-        Duration: {days} days
-        Budget: {budget}
-        Travel Type: {travel_type}
-        Interests: {', '.join(interests)}
+    Destination: {destination}
+    Duration: {days} days
+    Budget: {budget}
+    Travel Type: {travel_type}
+    Interests: {', '.join(interests)}
 
-        Include:
-        1. Day-wise itinerary
-        2. Recommended attractions
-        3. Food recommendations
-        4. Estimated budget
-        5. Travel tips
+    Include:
+    1. Day-wise itinerary
+    2. Top tourist attractions
+    3. Recommended food
+    4. Estimated budget
+    5. Travel tips
 
-        Format with headings and bullet points.
-        """
+    Format the answer neatly using markdown.
+    """
 
-        with st.spinner("Generating AI Travel Plan..."):
-
+    try:
+        with st.spinner("Generating travel plan..."):
             response = model.generate_content(prompt)
 
-            st.success("Travel Plan Generated Successfully!")
+        st.success("Travel Plan Generated Successfully!")
+        st.markdown(response.text)
 
-            st.markdown(response.text)
+    except Exception as e:
+        st.error(f"Error: {e}")
 
-# Footer
 st.markdown("---")
-st.caption("AI Travel Planner | Streamlit + Gemini AI")
+st.caption("Built with Streamlit + Gemini AI")
