@@ -11,7 +11,7 @@ st.subheader('Plan your next trip with AI')
 
 # User input section in the sidebar
 st.sidebar.header('Enter details to generate a travel plan:')
-api_key = 'AIzaSyCiIfiar_7GMDI3ZPGq7tX5gGorKkfojO4'
+api_key = 'AQ.Ab8RN6JPbuIGmk6Xs9Dr0qUeJAfQq9QIvO12x2G9R3Jv7Bafpg'
 destination = st.sidebar.text_input('Destination', 'Bangalore')
 date_input = st.sidebar.date_input('Travel Start Date', min_value=date.today())
 date = date_input.strftime('%Y-%m-%d')
